@@ -16,6 +16,11 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	get_mode_of_payment_info,
 	update_multi_mode_option,
 )
+<<<<<<< HEAD
+=======
+from erpnext.accounts.doctype.sales_invoice.services.loyalty import LoyaltyService
+from erpnext.accounts.doctype.sales_invoice.services.status import get_discounting_status
+>>>>>>> 138ef2b (fix(accounts): use discounting status helper for pos invoices)
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -574,16 +579,27 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) < getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Overdue and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
 					self.status = "Overdue"
 				elif (
+<<<<<<< HEAD
+=======
+					0 < flt(self.outstanding_amount) < total
+					and self.is_discounted
+					and get_discounting_status(self.name) == "Disbursed"
+				):
+					self.status = "Partly Paid and Discounted"
+				elif 0 < flt(self.outstanding_amount) < total:
+					self.status = "Partly Paid"
+				elif (
+>>>>>>> 138ef2b (fix(accounts): use discounting status helper for pos invoices)
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) >= getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
