@@ -6,7 +6,11 @@ import unittest
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.tests.utils import FrappeTestCase
+=======
+from frappe.utils import add_days, add_to_date, nowdate
+>>>>>>> 4d63b21 (test(accounts): cover discounted POS invoice statuses)
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -404,6 +408,101 @@ class TestPOSInvoice(unittest.TestCase):
 		pos_inv.insert()
 		self.assertRaises(PartialPaymentValidationError, pos_inv.submit)
 
+<<<<<<< HEAD
+=======
+	def test_partly_paid_invoices(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+
+		pos_inv = create_pos_invoice(pos_profile=self.pos_profile.name, rate=100, do_not_save=1)
+		pos_inv.append(
+			"payments",
+			{"mode_of_payment": "Cash", "amount": 90},
+		)
+		pos_inv.save()
+		pos_inv.submit()
+
+		self.assertEqual(pos_inv.paid_amount, 90)
+		self.assertEqual(pos_inv.status, "Partly Paid")
+
+		pos_inv.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 10}])
+		self.assertEqual(pos_inv.paid_amount, 100)
+		self.assertEqual(pos_inv.status, "Paid")
+
+		set_allow_partial_payment(self.pos_profile, 0)
+
+	def test_discounted_invoice_status(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos_inv = create_pos_invoice(
+			pos_profile=self.pos_profile.name, rate=100, is_discounted=1, do_not_save=1
+		)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 90})
+		pos_inv.insert()
+
+		# Seed the lookup records because Invoice Discounting only accepts Sales Invoice links.
+		discounting = frappe.get_doc(
+			doctype="Invoice Discounting",
+			name=frappe.generate_hash(length=10),
+			company=pos_inv.company,
+			docstatus=1,
+			status="Disbursed",
+		)
+		discounting.db_insert()
+		frappe.get_doc(
+			doctype="Discounted Invoice",
+			parent=discounting.name,
+			parenttype=discounting.doctype,
+			parentfield="invoices",
+			sales_invoice=pos_inv.name,
+			docstatus=1,
+		).db_insert()
+
+		pos_inv.submit()
+		pos_inv.reload()
+		self.assertEqual(pos_inv.docstatus, 1)
+		self.assertEqual(pos_inv.outstanding_amount, 10)
+		self.assertEqual(pos_inv.status, "Partly Paid and Discounted")
+
+		for outstanding_amount, due_date, expected_status in (
+			(10, add_days(nowdate(), -1), "Overdue"),
+			(10, nowdate(), "Partly Paid"),
+			(100, nowdate(), "Unpaid"),
+		):
+			with self.subTest(status=expected_status):
+				pos_inv.outstanding_amount = outstanding_amount
+				pos_inv.due_date = due_date
+				discounting.db_set("status", "Disbursed")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, f"{expected_status} and Discounted")
+
+				discounting.db_set("status", "Settled")
+				pos_inv.set_status()
+				self.assertEqual(pos_inv.status, expected_status)
+
+	def test_multi_payment_for_partly_paid_invoices(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+
+		pos_inv = create_pos_invoice(pos_profile=self.pos_profile.name, rate=100, do_not_save=1)
+		pos_inv.append(
+			"payments",
+			{"mode_of_payment": "Cash", "amount": 90},
+		)
+		pos_inv.save()
+		pos_inv.submit()
+
+		self.assertEqual(pos_inv.paid_amount, 90)
+		self.assertEqual(pos_inv.status, "Partly Paid")
+
+		pos_inv.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 5}])
+		self.assertEqual(pos_inv.paid_amount, 95)
+		self.assertEqual(pos_inv.status, "Partly Paid")
+
+		pos_inv.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 5}])
+		self.assertEqual(pos_inv.paid_amount, 100)
+		self.assertEqual(pos_inv.status, "Paid")
+
+		set_allow_partial_payment(self.pos_profile, 0)
+
+>>>>>>> 4d63b21 (test(accounts): cover discounted POS invoice statuses)
 	def test_serialized_item_transaction(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
