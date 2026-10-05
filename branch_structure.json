@@ -1,0 +1,33 @@
+{
+  "default_branch": "develop",
+  "branches": [
+    "develop",
+    "mergify/bp/version-15-hotfix/pr-59819",
+    "mergify/bp/version-16-hotfix/pr-59796",
+    "mergify/bp/version-16-hotfix/pr-59819",
+    "mergify/bp/version-16-hotfix/pr-59826",
+    "origin",
+    "version-15-hotfix",
+    "version-16-hotfix"
+  ],
+  "parent": {
+    "develop": null,
+    "mergify/bp/version-15-hotfix/pr-59819": "develop",
+    "mergify/bp/version-16-hotfix/pr-59796": "develop",
+    "mergify/bp/version-16-hotfix/pr-59819": "develop",
+    "mergify/bp/version-16-hotfix/pr-59826": "develop",
+    "origin": "develop",
+    "version-15-hotfix": "develop",
+    "version-16-hotfix": "develop"
+  },
+  "order": [
+    "develop",
+    "mergify/bp/version-15-hotfix/pr-59819",
+    "mergify/bp/version-16-hotfix/pr-59796",
+    "mergify/bp/version-16-hotfix/pr-59819",
+    "mergify/bp/version-16-hotfix/pr-59826",
+    "origin",
+    "version-15-hotfix",
+    "version-16-hotfix"
+  ]
+}
